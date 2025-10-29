@@ -1,0 +1,12 @@
+services:
+  bae-vit:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./models:/app/models
+      - ./test-images:/app/test-images
+    environment:
+      - PYTHONUNBUFFERED=1

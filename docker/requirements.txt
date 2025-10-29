@@ -1,0 +1,9 @@
+torch>=1.9
+torchvision>=0.10
+timm>=0.9
+opencv-python
+Pillow
+numpy
+streamlit
+matplotlib
+scikit-image

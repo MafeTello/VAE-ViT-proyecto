@@ -1,0 +1,50 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.env
+.venv/
+venv/
+env/
+*.env
+
+# Editors/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build/packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Tools caches
+.mypy_cache/
+.pytest_cache/
+.cache/
+
+# Logs
+*.log
+
+# Node/npm (por si hay tooling)
+node_modules/
+
+# Docker
+**/.pytest_cache/
+**/__pycache__/
+
+# Data (si subes datos, quita esta línea)
+data/
+
