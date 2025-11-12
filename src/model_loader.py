@@ -1,69 +1,68 @@
 # src/model_loader.py
-# Carga del modelo BAE-ViT y de los pesos
-# Ajusta los TODO a la implementación exacta del repo uw-rad-mitrp/BAE_ViT
+# Carga del modelo REAL BAE-ViT (no dummy)
 
+import os
+import yaml
 import torch
 import torch.nn as nn
-from typing import Optional
+from types import SimpleNamespace
 
-# === TODO 1: importa la clase/modelo real desde el repo ===
-# Ejemplos (elige el que aplique):
-# from models.bae_vit import BAEViT
-# from bae_vit.model import BAEViT
-# from tinyvit import tiny_vit_bae as BAEViT
+# Importa el builder del repo (esto registra rsna_baevit en timm)
+from models.build import build_model as build_baevit   # models/build.py
+from models.model_zoo import TimmRegressor            # asegura que model_zoo.py exista
 
-class DummyBAEViT(nn.Module):
+# Utilidad: dict -> objeto con atributos (recursivo)
+def _to_ns(d):
+    if isinstance(d, dict):
+        return SimpleNamespace(**{k: _to_ns(v) for k, v in d.items()})
+    return d
+
+def _load_config(yaml_path: str):
+    with open(yaml_path, "r") as f:
+        cfg_dict = yaml.safe_load(f)
+    # completa flags que usa build.py / model_zoo.py
+    # valores por defecto si no aparecen en el YAML
+    cfg_dict.setdefault("MODEL", {})
+    cfg_dict["MODEL"].setdefault("DROP_PATH_RATE", 0.2)
+    cfg_dict.setdefault("MI", {})
+    cfg_dict["MI"].setdefault("LAYER_LR_DECAY", 1.0)
+    cfg_dict.setdefault("FUSED_LAYERNORM", False)
+    return _to_ns(cfg_dict)
+
+def build_model(device: str | None = None) -> nn.Module:
     """
-    Modelo dummy para que el proyecto sea ejecutable antes de conectar el modelo real.
-    Devuelve un escalar ~120.0 meses (10 años), solo para probar la UI.
-    Reemplázalo por la clase real del repo y elimina esta clase.
-    """
-    def __init__(self):
-        super().__init__()
-        self.head = nn.Linear(1, 1, bias=False)
-        with torch.no_grad():
-            self.head.weight[:] = 120.0  # valor fijo
-
-    def forward(self, x, sex_token: Optional[torch.Tensor] = None):
-        b = x.shape[0]
-        one = torch.ones(b, 1, device=x.device, dtype=x.dtype)
-        y = self.head(one).squeeze(1)  # [B]
-        return y
-
-
-def build_model(device: Optional[str] = None) -> nn.Module:
-    """
-    Construye la arquitectura del modelo.
-    Devuelve el modelo en modo eval y movido a device.
+    Construye el TimmRegressor('rsna_baevit') con la config YAML.
     """
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    cfg = _load_config(os.path.join("configs", "baevit.yaml"))
 
-    # === TODO 2: reemplaza DummyBAEViT() por tu clase real (ej. BAEViT(...)) ===
-    # model = BAEViT(img_size=224, use_sex_token=True, ...)
-    model = DummyBAEViT()
-
-    model.eval().to(device)
+    # build_baevit retorna un TimmRegressor según el TYPE/NAME del YAML
+    model = build_baevit(cfg)
+    model = model.to(device).eval()
     return model
-
 
 def load_weights(model: nn.Module, ckpt_path: str) -> None:
     """
-    Carga pesos desde un checkpoint .pth / .pt / TorchScript si aplica.
-    Maneja map_location automáticamente.
+    Carga pesos del checkpoint. TimmRegressor expone .model (backbone timm)
+    y un helper para cargar checkpoints con llaves diversas.
     """
     map_loc = next(model.parameters()).device
+    ckpt = torch.load(ckpt_path, map_location=map_loc)
+
+    # TimmRegressor del repo trae un helper
+    # Intentamos varias formas de llave:
     try:
-        state = torch.load(ckpt_path, map_location=map_loc)
-        # Si el checkpoint tiene 'state_dict', úsalo; si no, intenta cargar directo.
-        if isinstance(state, dict) and "state_dict" in state:
-            state = {k.replace("module.", ""): v for k, v in state["state_dict"].items()}
-            model.load_state_dict(state, strict=False)
-        elif isinstance(state, dict):
-            state = {k.replace("module.", ""): v for k, v in state.items()}
-            model.load_state_dict(state, strict=False)
-        else:
-            # TorchScript (rare) → sugerimos no usar aquí.
-            raise RuntimeError("Formato de checkpoint no soportado automáticamente.")
+        # 1) si el ckpt viene con {"model": ...}
+        model.load_pretrained_model(ckpt_path)
+        print(f"[OK] Checkpoint cargado con TimmRegressor.load_pretrained_model: {ckpt_path}")
+        return
+    except Exception:
+        pass
+
+    try:
+        state = ckpt.get("model", ckpt)
+        model.model.load_state_dict(state, strict=False)
+        print(f"[OK] Pesos cargados en backbone timm desde: {ckpt_path}")
     except Exception as e:
-        print(f"[WARN] No se pudieron cargar pesos desde {ckpt_path}: {e}\n"
-              f"→ Revisa la ruta y el formato. Ejecutando con pesos por defecto (solo demo).")
+        print(f"[WARN] No se pudieron cargar pesos desde {ckpt_path}: {e}")
+        print("     → Verifica la ruta y el formato del checkpoint.")

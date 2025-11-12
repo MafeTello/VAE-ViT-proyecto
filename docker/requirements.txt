@@ -7,3 +7,6 @@ numpy
 streamlit
 matplotlib
 scikit-image
+pyyaml
+plotly
+streamlit-image-comparison

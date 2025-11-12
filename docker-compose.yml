@@ -7,6 +7,8 @@ services:
       - "7860:7860"
     volumes:
       - ./models:/app/models
-      - ./test-images:/app/test-images
+      - ./test_images:/app/test_images   # ojo: tu carpeta se llama "test_images", no "test-images"
+      - ./configs:/app/configs:ro        # ⬅️ monta configs de solo lectura
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
