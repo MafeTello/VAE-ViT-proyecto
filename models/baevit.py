@@ -2,6 +2,21 @@
 # BAE-ViT Model Architecture
 # --------------------------------------------------------
 
+"""
+ARQUITECTURA BAE-ViT (BAEViT):
+Vision Transformer Multimodal para Estimación de Edad Ósea
+
+Características principales:
+1. ARQUITECTURA HÍBRIDA: Combina MBConv (CNN) + Transformer
+2. MULTIMODALIDAD: Integra imagen + sexo mediante fusión temprana
+3. ATENCIÓN POR VENTANAS: Eficiencia computacional con shifted windows
+4. POSITIONAL ENCODING PARA GÉNERO: Bias especial para token de sexo
+
+Innovaciones clave vs ViT tradicional:
+- Token de sexo participa en mecanismo de atención
+- Fusión temprana en lugar de fusión tardía
+- Optimizado para imágenes médicas (radiografías)
+"""
 import itertools
 import torch
 import torch.nn as nn

@@ -6,7 +6,17 @@ score_cam_fast: versión rápida para RSNA_BAEViT
 - top_k: si se especifica, usa solo los top_k canales (más rápido)
 Retorna heatmap numpy (H_img, W_img) con valores en [0,1].
 """
+"""
 
+Este módulo genera mapas de calor que muestran las regiones de la imagen 
+que más contribuyen a la predicción de edad ósea.
+
+Método Fast-ScoreCAM optimizado para BAE-ViT:
+- Captura activaciones de la última capa del transformer
+- Calcula pesos por canal usando energía y softmax
+- Combina activaciones ponderadas sin re-ejecutar el modelo
+- Genera heatmaps de alta resolución para interpretación clínica
+"""
 from typing import Optional
 import torch
 import torch.nn.functional as F

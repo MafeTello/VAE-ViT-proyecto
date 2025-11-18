@@ -1,3 +1,14 @@
+"""
+CALIBRADOR DE EDAD ÓSEA:
+Este módulo ajusta las predicciones crudas del modelo BAE-ViT
+para convertirlas a valores clínicamente significativos (meses).
+
+Propósito:
+- Escalar salidas del modelo a rango fisiológico real (0-220 meses)
+- Prevenir valores negativos o fuera de rango
+- Mejorar concordancia con estándares clínicos
+"""
+
 import torch
 import torch.nn as nn
 

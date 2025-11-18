@@ -1,3 +1,9 @@
+"""
+UTILIDADES PARA VISUALIZACIÓN Y PROCESAMIENTO:
+Funciones auxiliares para manejo de imágenes y mapas de calor
+en la aplicación Streamlit de BAE-ViT.
+"""
+
 # src/utils.py
 import numpy as np
 from PIL import Image
