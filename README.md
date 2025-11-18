@@ -152,8 +152,11 @@ Los pesos se cargan automáticamente al iniciar la aplicación desde:
 
 📁 Estructura del Repositorio
 VAE-ViT-proyecto/
+
 ├── configs/
+
 │   └── baevit.yaml
+
 ├── docker/
 │   └── Dockerfile
 ├── models/
