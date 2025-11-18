@@ -152,26 +152,47 @@ Los pesos se cargan automáticamente al iniciar la aplicación desde:
 
 📁 Estructura del Repositorio
 VAE-ViT-proyecto/
+
 ├── configs/
+
 │   └── baevit.yaml
+
 ├── docker/
+
 │   └── Dockerfile
+
 ├── models/
+
 │   ├── baevit.py
+
 │   ├── build.py
+
 │   ├── model_zoo.py
+
 │   └── baevit-ckpt_epoch_299.pth
+
 ├── src/
+
 │   ├── model_loader.py
+
 │   ├── inference.py
+
 │   ├── preprocess.py
+
 │   ├── score_cam.py
+
 │   ├── calibrator.py
+
 │   └── utils.py
+
 ├── test_images/
+
 ├── app.py
+
 ├── docker-compose.yml
+
 ├── requirements.txt
+
 └── README.md
 
 
