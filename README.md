@@ -42,7 +42,7 @@ Fórmula de Atención:
 
 Atención = softmax(Q·Kᵀ/√d_k)·V
 
-**Característica única:**El token de sexo se mezcla con los tokens de imagen en cada capa de atención, permitiendo interacciones complejas entre características visuales y biológicas desde las primeras etapas del procesamiento.
+**Característica única:** El token de sexo se mezcla con los tokens de imagen en cada capa de atención, permitiendo interacciones complejas entre características visuales y biológicas desde las primeras etapas del procesamiento.
 
 ## 🚀 Pasos para Ejecutar el Proyecto
 ### Prerrequisitos

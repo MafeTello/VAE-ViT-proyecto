@@ -1,3 +1,11 @@
+#"""
+#
+#Este archivo YAML define todos los hiperparámetros y configuraciones del modelo:
+#1. Configuración del dataset y preprocesamiento
+#2. Arquitectura del modelo y parámetros
+#3. Configuración multimodal (imagen + sexo)
+#4. Parámetros de entrenamiento e inferencia
+
 DATA:
   DATASET: rsna
   IMG_SIZE: 512
@@ -14,3 +22,18 @@ MI:
   LABEL_SEPARATOR: ','
   IS_GENDER_INFO: true
   LAYER_LR_DECAY: 1.0
+
+# =============================================================================
+# EXPLICACIÓN DE LA CONFIGURACIÓN MULTIMODAL:
+# 
+# BAE-ViT implementa fusión temprana mediante:
+# 1. IS_GENDER_INFO: true - Habilita el token de sexo
+# 2. El sexo se codifica como token adicional que se concatena con los patches de imagen
+# 3. El mecanismo de atención permite interacción completa entre tokens de imagen y sexo
+# 4. Esto diferencia BAE-ViT de aproximaciones de fusión tardía tradicionales
+# 
+# CARACTERÍSTICAS TÉCNICAS:
+# - Input: Imagen 512x512 + Sexo (F/M)
+# - Output: Edad ósea en meses (regresión)
+# - Normalización: Media y STD específicas del dataset RSNA
+# - Regularización: DropPath Rate 0.2
