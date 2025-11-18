@@ -158,23 +158,41 @@ VAE-ViT-proyecto/
 │   └── baevit.yaml
 
 ├── docker/
+
 │   └── Dockerfile
+
 ├── models/
+
 │   ├── baevit.py
+
 │   ├── build.py
+
 │   ├── model_zoo.py
+
 │   └── baevit-ckpt_epoch_299.pth
+
 ├── src/
+
 │   ├── model_loader.py
+
 │   ├── inference.py
+
 │   ├── preprocess.py
+
 │   ├── score_cam.py
+
 │   ├── calibrator.py
+
 │   └── utils.py
+
 ├── test_images/
+
 ├── app.py
+
 ├── docker-compose.yml
+
 ├── requirements.txt
+
 └── README.md
 
 
