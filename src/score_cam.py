@@ -17,6 +17,25 @@ Método Fast-ScoreCAM optimizado para BAE-ViT:
 - Combina activaciones ponderadas sin re-ejecutar el modelo
 - Genera heatmaps de alta resolución para interpretación clínica
 """
+"""
+    GENERACIÓN RÁPIDA DE MAPAS SCORE-CAM:
+    Proceso optimizado que evita múltiples forward passes:
+    1. Single forward pass para capturar activaciones
+    2. Cálculo de energía por canal como medida de importancia
+    3. Selección opcional de top-K canales más relevantes
+    4. Combinación lineal ponderada de activaciones
+    5. Interpolación a tamaño original de la imagen
+    
+    Args:
+        model: Modelo BAE-ViT para inferencia
+        pil_img: Imagen PIL en escala de grises o RGB
+        sex_token: Token de sexo (0=F, 1=M) para multimodalidad
+        device: Dispositivo de ejecución (auto-detecta GPU/CPU)
+        top_k: Número de canales a considerar (None = todos)
+    
+    Returns:
+        heatmap: Array numpy [H_orig, W_orig] con valores normalizados [0,1]
+    """
 from typing import Optional
 import torch
 import torch.nn.functional as F

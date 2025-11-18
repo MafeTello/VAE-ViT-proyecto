@@ -8,7 +8,20 @@ Propósito:
 - Prevenir valores negativos o fuera de rango
 - Mejorar concordancia con estándares clínicos
 """
+"""
+    es importante tener en cuenta la calibracion de la capa lineal donde :
+    Aplica transformación lineal simple: y_calibrada = w * x_cruda + b
+    
+    Donde:
+    - w: Factor de escala (9.5) para convertir a meses
+    - b: Término de bias (2.0) para evitar valores negativos
+    - Clamp: Limita a rango fisiológico [0, 220] meses
+    """
 
+        # Los valores fueron determinados empíricamente para:
+        # - Escalar predicciones crudas (~0.1-1.0) a meses (~1-180)
+        # - Evitar predicciones negativas
+        # - Mantener rango fisiológico realista
 import torch
 import torch.nn as nn
 
