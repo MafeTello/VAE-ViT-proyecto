@@ -23,7 +23,7 @@ MI:
   IS_GENDER_INFO: true
   LAYER_LR_DECAY: 1.0
 
-# =============================================================================
+# 
 # EXPLICACIÓN DE LA CONFIGURACIÓN MULTIMODAL:
 # 
 # BAE-ViT implementa fusión temprana mediante:
