@@ -7,7 +7,7 @@ from timm.models.registry import register_model
 from .baevit import RSNA_BAEViT
 
 # ======================================================
-# 1️⃣ Registrar modelo RSNA_BAEViT dentro de timm
+# 1Registrar modelo RSNA_BAEViT dentro de timm
 # ======================================================
 @register_model
 def rsna_baevit(
@@ -33,7 +33,7 @@ def rsna_baevit(
 
 
 # ======================================================
-# 2️⃣ Wrapper general para modelos de regresión
+# Wrapper general para modelos de regresión
 # ======================================================
 class TimmRegressor(nn.Module):
     def __init__(

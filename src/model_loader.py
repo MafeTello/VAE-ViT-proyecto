@@ -18,9 +18,9 @@ import torch
 import torch.nn as nn
 from types import SimpleNamespace
 
-# Importa el builder del repo (esto registra rsna_baevit en timm)
+# Importa el builder del repo
 from models.build import build_model as build_baevit   # models/build.py
-from models.model_zoo import TimmRegressor            # asegura que model_zoo.py exista
+from models.model_zoo import TimmRegressor            #
 
 # Utilidad: dict -> objeto con atributos (recursivo)
 def _to_ns(d):
@@ -31,7 +31,7 @@ def _to_ns(d):
 def _load_config(yaml_path: str):
     with open(yaml_path, "r") as f:
         cfg_dict = yaml.safe_load(f)
-    # completa flags que usa build.py / model_zoo.py
+    # completar flags que usa build.py / model_zoo.py
     # valores por defecto si no aparecen en el YAML
     cfg_dict.setdefault("MODEL", {})
     cfg_dict["MODEL"].setdefault("DROP_PATH_RATE", 0.2)
