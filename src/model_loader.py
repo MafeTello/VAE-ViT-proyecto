@@ -4,6 +4,14 @@
 #CARGA DE PESOS DEL MODELO BAE-ViT:En este modulo podemos observar que se encarga de cargar la configuración del modelo desde archivo YAML
 #donde se construye la arquitectura BAE-ViT usando timm, en el cual se Carga los pesos preentrenados desde checkpoint .pth y finalmente
 # Configurar el modelo en modo evaluación
+# CARGA DE PESOS PRETRENADOS:En este punto se intenta múltiples estrategias de carga del checkpoint
+# donde se manejan diferentes formatos de archivos .pth
+# Usando helper de TimmRegressor para carga robusta
+# Y Aplicando pesos al backbone del modelo
+
+# src/model_loader.py
+# Carga del modelo REAL BAE-ViT (no dummy)
+
 import os
 import yaml
 import torch
@@ -19,8 +27,7 @@ def _to_ns(d):
     if isinstance(d, dict):
         return SimpleNamespace(**{k: _to_ns(v) for k, v in d.items()})
     return d
-#Aqui se carga la configuracion donde - Lee el archivo YAML con hiperparámetros del modelo y establece valores por defecto para parámetros faltantes
-   
+
 def _load_config(yaml_path: str):
     with open(yaml_path, "r") as f:
         cfg_dict = yaml.safe_load(f)
@@ -37,8 +44,6 @@ def build_model(device: str | None = None) -> nn.Module:
     """
     Construye el TimmRegressor('rsna_baevit') con la config YAML.
     """
-    # """Aqui construye el modelo y carga la configuracion desde baevit, ademas construte el modelo timm y se establece el modo de evaluacion
-    
     device = device or ("cuda" if torch.cuda.is_available() else "cpu")
     cfg = _load_config(os.path.join("configs", "baevit.yaml"))
 
@@ -49,11 +54,8 @@ def build_model(device: str | None = None) -> nn.Module:
 
 def load_weights(model: nn.Module, ckpt_path: str) -> None:
     """
-    CARGA DE PESOS PRETRENADOS:
-    En este punto se intenta múltiples estrategias de carga del checkpoint
-    donde se manejan diferentes formatos de archivos .pth
-    Usando helper de TimmRegressor para carga robusta
-    Y Aplicando pesos al backbone del modelo
+    Carga pesos del checkpoint. TimmRegressor expone .model (backbone timm)
+    y un helper para cargar checkpoints con llaves diversas.
     """
     map_loc = next(model.parameters()).device
     ckpt = torch.load(ckpt_path, map_location=map_loc)

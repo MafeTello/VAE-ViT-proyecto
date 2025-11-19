@@ -2,21 +2,45 @@
 # BAE-ViT Model Architecture
 # --------------------------------------------------------
 
-"""
-ARQUITECTURA BAE-ViT (BAEViT):
-Vision Transformer Multimodal para Estimación de Edad Ósea
 
-Características principales:
-1. ARQUITECTURA HÍBRIDA: Combina MBConv (CNN) + Transformer
-2. MULTIMODALIDAD: Integra imagen + sexo mediante fusión temprana
-3. ATENCIÓN POR VENTANAS: Eficiencia computacional con shifted windows
-4. POSITIONAL ENCODING PARA GÉNERO: Bias especial para token de sexo
+#ARQUITECTURA BAE-ViT (BAEViT):
+#Vision Transformer Multimodal para Estimación de Edad Ósea
 
-Innovaciones clave vs ViT tradicional:
-- Token de sexo participa en mecanismo de atención
-- Fusión temprana en lugar de fusión tardía
-- Optimizado para imágenes médicas (radiografías)
-"""
+#Características principales:
+#1. ARQUITECTURA HÍBRIDA: Combina MBConv (CNN) + Transformer
+#2. MULTIMODALIDAD: Integra imagen + sexo mediante fusión temprana
+#3. ATENCIÓN POR VENTANAS: Eficiencia computacional con shifted windows
+#4. POSITIONAL ENCODING PARA GÉNERO: Bias especial para token de sexo
+
+#Innovaciones clave vs ViT tradicional:
+#- Token de sexo participa en mecanismo de atención
+#- Fusión temprana en lugar de fusión tardía
+#- Optimizado para imágenes médicas (radiografías)
+#tenemos:
+#BLOQUE CONVOLUCIONAL CON BATCH NORM:
+#Secuencia Convolución → BatchNorm para eficiencia y estabilidad
+
+    #DROP PATH (STOCHASTIC DEPTH):
+    #Regularización que aleatoriamente omite capas durante entrenamiento
+    #Mejora generalización y previene overfitting
+    
+
+#EMBEDDING DE PARCHES:
+#Divide imagen en patches y proyecta a espacio dimensional
+#Proceso: Imagen → Patches 4×4 → Embedding
+#     BLOQUE MBConv (MOBILENET V2):
+#Bloque convolucional invertido eficiente
+#Proceso: Expand → Depthwise Conv → Project
+#     FUSIÓN DE PARCHES (DOWNSAMPLE):
+#Reduce resolución espacial y aumenta dimensionalidad
+# Similar a pooling pero con operaciones convolucionales
+    #MODELO BAE-ViT COMPLETO:
+    #Arquitectura principal preentrenada en dataset RSNA
+
+# --------------------------------------------------------
+# BAE-ViT Model Architecture
+# --------------------------------------------------------
+
 import itertools
 import torch
 import torch.nn as nn
@@ -27,9 +51,7 @@ from timm.models.layers import DropPath as TimmDropPath,\
 from timm.models.registry import register_model
 from typing import Tuple
 
-#BLOQUE CONVOLUCIONAL CON BATCH NORM:
-#Secuencia Convolución → BatchNorm para eficiencia y estabilidad
-    
+
 class Conv2d_BN(torch.nn.Sequential):
     def __init__(self, a, b, ks=1, stride=1, pad=0, dilation=1,
                  groups=1, bn_weight_init=1):
@@ -54,11 +76,7 @@ class Conv2d_BN(torch.nn.Sequential):
         m.bias.data.copy_(b)
         return m
 
-"""
-    DROP PATH (STOCHASTIC DEPTH):
-    Regularización que aleatoriamente omite capas durante entrenamiento
-    Mejora generalización y previene overfitting
-    """
+
 class DropPath(TimmDropPath):
     def __init__(self, drop_prob=None):
         super().__init__(drop_prob=drop_prob)
@@ -69,11 +87,7 @@ class DropPath(TimmDropPath):
         msg += f'(drop_prob={self.drop_prob})'
         return msg
 
-"""
-    EMBEDDING DE PARCHES:
-    Divide imagen en patches y proyecta a espacio dimensional
-    Proceso: Imagen → Patches 4×4 → Embedding
-    """
+
 class PatchEmbed(nn.Module):
     def __init__(self, in_chans, embed_dim, resolution, activation):
         super().__init__()
@@ -93,11 +107,7 @@ class PatchEmbed(nn.Module):
     def forward(self, x):
         return self.seq(x)
 
-    """
-    BLOQUE MBConv (MOBILENET V2):
-    Bloque convolucional invertido eficiente
-    Proceso: Expand → Depthwise Conv → Project
-    """
+
 class MBConv(nn.Module):
     def __init__(self, in_chans, out_chans, expand_ratio,
                  activation, drop_path):
@@ -138,11 +148,7 @@ class MBConv(nn.Module):
 
         return x
 
-    """
-    FUSIÓN DE PARCHES (DOWNSAMPLE):
-    Reduce resolución espacial y aumenta dimensionalidad
-    Similar a pooling pero con operaciones convolucionales
-    """
+
 class PatchMerging(nn.Module):
     def __init__(self, input_resolution, dim, out_dim, activation):
         super().__init__()
@@ -233,14 +239,7 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
-"""
-    MECANISMO DE ATENCIÓN MULTI-HEAD:
-    Implementa atención con soporte para token de sexo
-    
-    Innovación: positional encoding especial para género
-    - gender_biases: Parámetros aprendidos para interacción sexo-imagen
-    - Permite al token de sexo influir en todos los tokens de imagen
-    """
+
 class Attention(torch.nn.Module):
     def __init__(self, dim, key_dim, num_heads=8,
                  attn_ratio=4,
@@ -516,10 +515,7 @@ class BasicLayer(nn.Module):
     def extra_repr(self) -> str:
         return f"dim={self.dim}, input_resolution={self.input_resolution}, depth={self.depth}"
 
-    """
-    MODELO BAE-ViT COMPLETO:
-    Arquitectura principal preentrenada en dataset RSNA
-    """
+
 class RSNA_BAEViT(nn.Module):
     def __init__(self, img_size=224, in_chans=3, num_classes=1000,
                  embed_dims=[96, 192, 384, 768], depths=[2, 2, 6, 2],
@@ -655,10 +651,7 @@ class RSNA_BAEViT(nn.Module):
     @torch.jit.ignore
     def no_weight_decay_keywords(self):
         return {'attention_biases', 'gender_biases'}
-        """
-        EXTRACCIÓN DE CARACTERÍSTICAS MULTIMODALES:
-        Procesa conjuntamente imagen + información de sexo
-        """
+
     def forward_features(self, input_tensor):
         # x: (N, C, H, W)
         x, gender = input_tensor

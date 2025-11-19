@@ -1,11 +1,3 @@
-#"""
-#
-#Este archivo YAML define todos los hiperparámetros y configuraciones del modelo:
-#1. Configuración del dataset y preprocesamiento
-#2. Arquitectura del modelo y parámetros
-#3. Configuración multimodal (imagen + sexo)
-#4. Parámetros de entrenamiento e inferencia
-
 DATA:
   DATASET: rsna
   IMG_SIZE: 512
@@ -37,3 +29,10 @@ MI:
 # - Output: Edad ósea en meses (regresión)
 # - Normalización: Media y STD específicas del dataset RSNA
 # - Regularización: DropPath Rate 0.2
+#"""
+#
+#Este archivo YAML define todos los hiperparámetros y configuraciones del modelo:
+#1. Configuración del dataset y preprocesamiento
+#2. Arquitectura del modelo y parámetros
+#3. Configuración multimodal (imagen + sexo)
+#4. Parámetros de entrenamiento e inferencia

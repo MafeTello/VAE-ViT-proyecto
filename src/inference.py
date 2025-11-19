@@ -2,14 +2,20 @@
 # Fast-ScoreCAM para RSNA-BAEViT (sin modificar el modelo original)
 # --------------------------------------------------------------
 
-"""
-GENERACIÓN DE INFERENCIA Y SCORE-CAM:
-En este archivo se maneja :
-1. Predicción de edad ósea a partir de radiografía + sexo
-2. Generación de mapas de calor Score-CAM para interpretabilidad
-3. Hook en el modelo para capturar activaciones
-4. Procesamiento multimodal (imagen + token de sexo)
-"""
+#GENERACIÓN DE INFERENCIA Y SCORE-CAM:
+#En este archivo se maneja :
+#1. Predicción de edad ósea a partir de radiografía + sexo
+#2. Generación de mapas de calor Score-CAM para interpretabilidad
+#3. Hook en el modelo para capturar activaciones
+#4. Procesamiento multimodal (imagen + token de sexo)
+#INFERENCIA MULTIMODAL BAE-ViT:
+#- Combina procesamiento de imagen y datos clínicos (sexo)
+#- Genera predicciones de edad ósea en meses
+#- Produce mapas de atención Score-CAM
+# Maneja hook para capturar activaciones intermedias
+# src/inference.py
+# Fast-ScoreCAM para RSNA-BAEViT (sin modificar el modelo original)
+# --------------------------------------------------------------
 
 from typing import Literal, Optional, List
 from PIL import Image
@@ -25,11 +31,8 @@ Sex = Literal["F", "M"]
 
 class BAEVitInferencer:
     """
-    INFERENCIA MULTIMODAL BAE-ViT:
-    - Combina procesamiento de imagen y datos clínicos (sexo)
-    - Genera predicciones de edad ósea en meses
-    - Produce mapas de atención Score-CAM
-    - Maneja hook para capturar activaciones intermedias
+    Inferencia + Fast-ScoreCAM para RSNA-BAEViT.
+    Hook en la última capa (antes del mean pooling).
     """
     def __init__(self, ckpt_path: Optional[str] = None, device: Optional[str] = None):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
@@ -55,13 +58,6 @@ class BAEVitInferencer:
         Retorna (tokens, gender)
         
         tokens tiene shape [B, 16*16, C]
-        Aqui se registran hook para activaciones 
-        
-        - Se conecta a la última capa del transformer
-        - Captura activaciones antes del global pooling
-        - Permite generar mapas de atención Score-CAM
-        - Transforma tokens 1D a representación espacial 2D
-        
         """
         last_layer = self.model.model.layers[-1]
 
@@ -81,10 +77,7 @@ class BAEVitInferencer:
     def _sex_token(sex: Sex, device: str, batch: int = 1) -> torch.Tensor:
         v = 1 if str(sex).upper().startswith("M") else 0
         return torch.full((batch, 1), v, dtype=torch.long, device=device)
-## es importante mencionar la CODIFICACIÓN DEL SEXO: aqui es donde se Convierte sexo (F/M) a tensor numérico
-#denominado por Femenino: 0, Masculino: 1
-# y donde Se integra como token adicional en el transformer
-    
+
     # ---------------------------------------------------------
     # Predicción usual
     # ---------------------------------------------------------
@@ -96,10 +89,7 @@ class BAEVitInferencer:
 
         y = self.model(x, stoken)
         return float(y.item())
- 
-#en el codigo de arriba nos indica la PREDICCIÓN DE EDAD ÓSEA ya que el preprocesa imagen y convierte a tensor, donde Codifica sexo como token
-#y ejecuta forward pass del modelo, como salida se retorna edad estimada en meses
-        
+
     # ---------------------------------------------------------
     # Fast-ScoreCAM
     # ---------------------------------------------------------
@@ -108,11 +98,6 @@ class BAEVitInferencer:
         """
         Genera heatmap [H,W] usando pesos canal-wise (softmax)
         sobre activaciones espaciales de la última capa.
-        En la generacion del score cam se 
-        Captura activaciones de la última capa via hook
-        Calcula pesos por canal usando softmax
-        Combina activaciones ponderadas para crear heatmap
-        
         """
         self._acts = None
 

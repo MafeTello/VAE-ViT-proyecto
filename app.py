@@ -1,10 +1,24 @@
-"""
-En este archivo nos apoyamos para la integracion con streamlit:
-Tenemos la IU, la cual nos permite cargar radiografías y seleccionar sexo, nos permite en caso tal de que se desee
-ejecutar inferencia del modelo BAE-ViT;Ademas de mostrarnos los resultados de la  edad ósea estimada, en el cual se Genera y visualiza mapas de calor Score-CAM,
-donde se agrego una funcionalidad que mantiene historial de predicciones que se pueden exportar para despues hacer un dashboard de visualizacion de las predicciones 
-como parte de la analitica final.
-"""
+#En este archivo nos apoyamos para la integracion con streamlit:
+# Tenemos la IU, la cual nos permite cargar radiografías y seleccionar sexo, nos permite en caso tal de que se desee
+# ejecutar inferencia del modelo BAE-ViT;Ademas de mostrarnos los resultados de la  edad ósea estimada, en el cual se Genera y visualiza mapas de calor Score-CAM,
+# donde se agrego una funcionalidad que mantiene historial de predicciones que se pueden exportar para despues hacer un dashboard de visualizacion de las predicciones 
+# como parte de la analitica final.
+# en este modulo se carga el modelo una vez al iniciar la app, tambien detecta automáticamente GPU/CPU y 
+# mantiene el modelo en session_state para reutilización
+#en el modulo de seccion principal en este modulo se trabaja la interfaz principal de la aplicacion
+#  Uploader para cargar radiografías
+#  Selector de sexo del paciente
+#  Botón para ejecutar inferencia
+#  Visualización de resultados y mapas de calor
+#EJECUCIÓN DE INFERENCIA:
+# Cuando el usuario hace clic en "Predecir":
+# Preprocesa la imagen cargada
+# Codifica el sexo como tensor
+# Ejecuta el modelo BAE-ViT
+# Aplica calibración a la predicción
+# Genera mapa de calor Score-CAM
+# Actualiza el historial
+
 import streamlit as st
 import torch
 import yaml
@@ -48,10 +62,6 @@ with open("configs/baevit.yaml", "r") as f:
 # ------------------------------
 # INICIALIZAR MODELO
 # ------------------------------
-"""en este modulo se carga el modelo una vez al iniciar la app, tambien detecta automáticamente GPU/CPU y 
-mantiene el modelo en session_state para reutilización
-"""
-
 if "model" not in st.session_state:
     st.session_state.device = "cuda" if torch.cuda.is_available() else "cpu"
     st.session_state.model = build_model()
@@ -163,15 +173,6 @@ if show_hist and st.session_state.history:
 # ==========================================================================
 # SECCIÓN PRINCIPAL
 # ==========================================================================
-
-"""
-en este modulo se trabaja la interfaz principal de la aplicacion
-- Uploader para cargar radiografías
-- Selector de sexo del paciente
-- Botón para ejecutar inferencia
-- Visualización de resultados y mapas de calor
-"""
-
 st.title("🦴 Estimación de Edad Ósea con BAE-ViT")
 st.caption("Sube una radiografía y obtendrás la edad ósea estimada.")
 
@@ -194,16 +195,6 @@ with colL:
 # ==========================================================================
 # INFERENCIA
 # ==========================================================================
-"""
-EJECUCIÓN DE INFERENCIA:
-Cuando el usuario hace clic en "Predecir":
-Preprocesa la imagen cargada
-Codifica el sexo como tensor
-Ejecuta el modelo BAE-ViT
-Aplica calibración a la predicción
-Genera mapa de calor Score-CAM
-Actualiza el historial
-"""
 if run and uploaded:
 
     device = st.session_state.device
@@ -270,3 +261,5 @@ if run and uploaded:
         "categoria": categoria,
         "img_small": thumb
     })
+
+

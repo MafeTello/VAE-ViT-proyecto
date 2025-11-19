@@ -1,4 +1,26 @@
 # src/score_cam.py
+#score_cam_fast: versión rápida para RSNA_BAEViT
+#Engancha la salida espacial del último layer (model.model.layers[-1])
+#Calcula energía por canal y usa softmax como pesos (no hace re-forwards)
+# top_k: si se especifica, usa solo los top_k canales (más rápido)
+# Retorna heatmap numpy (H_img, W_img) con valores en [0,1].
+
+#Este módulo genera mapas de calor que muestran las regiones de la imagen que más contribuyen a la predicción de edad ósea.
+
+#Método Fast-ScoreCAM optimizado para BAE-ViT:
+# - Captura activaciones de la última capa del transformer
+#- Calcula pesos por canal usando energía y softmax
+#- Combina activaciones ponderadas sin re-ejecutar el modelo
+#- Genera heatmaps de alta resolución para interpretación clínica
+
+#GENERACIÓN RÁPIDA DE MAPAS SCORE-CAM:
+# Proceso optimizado que evita múltiples forward passes:
+#1. Single forward pass para capturar activaciones
+#2. Cálculo de energía por canal como medida de importancia
+#3. Selección opcional de top-K canales más relevantes
+#4. Combinación lineal ponderada de activaciones
+#5. Interpolación a tamaño original de la imagen
+# src/score_cam.py
 """
 score_cam_fast: versión rápida para RSNA_BAEViT
 - Engancha la salida espacial del último layer (model.model.layers[-1])
@@ -6,36 +28,7 @@ score_cam_fast: versión rápida para RSNA_BAEViT
 - top_k: si se especifica, usa solo los top_k canales (más rápido)
 Retorna heatmap numpy (H_img, W_img) con valores en [0,1].
 """
-"""
 
-Este módulo genera mapas de calor que muestran las regiones de la imagen 
-que más contribuyen a la predicción de edad ósea.
-
-Método Fast-ScoreCAM optimizado para BAE-ViT:
-- Captura activaciones de la última capa del transformer
-- Calcula pesos por canal usando energía y softmax
-- Combina activaciones ponderadas sin re-ejecutar el modelo
-- Genera heatmaps de alta resolución para interpretación clínica
-"""
-"""
-    GENERACIÓN RÁPIDA DE MAPAS SCORE-CAM:
-    Proceso optimizado que evita múltiples forward passes:
-    1. Single forward pass para capturar activaciones
-    2. Cálculo de energía por canal como medida de importancia
-    3. Selección opcional de top-K canales más relevantes
-    4. Combinación lineal ponderada de activaciones
-    5. Interpolación a tamaño original de la imagen
-    
-    Args:
-        model: Modelo BAE-ViT para inferencia
-        pil_img: Imagen PIL en escala de grises o RGB
-        sex_token: Token de sexo (0=F, 1=M) para multimodalidad
-        device: Dispositivo de ejecución (auto-detecta GPU/CPU)
-        top_k: Número de canales a considerar (None = todos)
-    
-    Returns:
-        heatmap: Array numpy [H_orig, W_orig] con valores normalizados [0,1]
-    """
 from typing import Optional
 import torch
 import torch.nn.functional as F
